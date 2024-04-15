@@ -13,7 +13,7 @@ namespace DataAccess.Concrete.EntityFramework
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;
-                Database=Recap;Trusted_Connection=true;");
+                Database=Recap;Trusted_Connection=true;TrustServerCertificate=True");
         }
 
         public DbSet<Car> Cars { get; set; }

@@ -1,10 +1,16 @@
 ﻿using Business.Concrete;
 using DataAccess.Concrete.EntityFramework;
 using DataAccess.Concrete.InMemory;
+using Entities.Concrete;
 
-CarManager carManager = new CarManager(new EfCarDal());
 
-foreach (var car in carManager.GetAll())
+ static void CarTest()
 {
-    Console.WriteLine(car.CarName);
+    CarManager carManager = new CarManager(new EfCarDal());
+    foreach (var car in carManager.GetCarDetails())
+    {
+        Console.WriteLine(car.CarName + " / " + car.BrandName);
+    }
 }
+
+CarTest();
