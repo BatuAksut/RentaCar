@@ -4,12 +4,21 @@ using DataAccess.Concrete.InMemory;
 using Entities.Concrete;
 
 
- static void CarTest()
+
+
+static void CarTest()
 {
     CarManager carManager = new CarManager(new EfCarDal());
-    foreach (var car in carManager.GetCarDetails())
-    {
-        Console.WriteLine(car.CarName + " / " + car.BrandName);
+    var result = carManager.GetCarDetails();
+    if (result.Success){
+        foreach (var car in result.Data)
+        {
+            Console.WriteLine(car.CarName + " / " + car.BrandName);
+        }
+    }
+    
+    else {
+        Console.WriteLine(result.Message);
     }
 }
 
