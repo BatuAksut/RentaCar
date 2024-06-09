@@ -4,7 +4,9 @@ using DataAccess.Concrete.InMemory;
 using Entities.Concrete;
 
 
-
+RentalManager rentalManager = new RentalManager(new EfRentalDal());
+var rentaladd = rentalManager.Add(new Rental { CarId = 5, CustomerId = 4, RentDate = DateTime.Now });
+Console.WriteLine(rentaladd.Message);
 
 static void CarTest()
 {
@@ -22,4 +24,4 @@ static void CarTest()
     }
 }
 
-CarTest();
+//CarTest();
