@@ -2,6 +2,7 @@
 using Business.Constants;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
+using DataAccess.Concrete.EntityFramework;
 using Entities.Concrete;
 using Entities.DTOs;
 using System;
@@ -67,6 +68,11 @@ namespace Business.Concrete
         {
             _carDal.Delete(car);
             return new SuccessDataResult<List<Car>>(Messages.CarDeleted);
+        }
+
+        public IDataResult<Car> GetById(int id)
+        {
+            return new SuccessDataResult<Car>(_carDal.Get(b => b.CarId == id));
         }
     }
 }
