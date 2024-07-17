@@ -22,10 +22,12 @@ namespace Business.Concrete
     public class CarManager : ICarService
     {
         ICarDal _carDal;
+        IBrandService _brandService;
 
-        public CarManager(ICarDal carDal)
+        public CarManager(ICarDal carDal,IBrandService brandService)
         {
             _carDal = carDal;
+            _brandService = brandService;
         }
 
         public IDataResult<List<Car>> GetAll()
@@ -76,6 +78,37 @@ namespace Business.Concrete
         public IDataResult<Car> GetById(int id)
         {
             return new SuccessDataResult<Car>(_carDal.Get(b => b.CarId == id));
+        }
+        //Business
+        private IResult CheckIfCarCountOfBrandCorrect(int brandId)
+        {
+            var result = _carDal.GetAll(p => p.BrandId == brandId).Count;
+
+            if (result >= 10)
+            {
+                return new ErrorResult(Messages.CarCountOfBrandError);
+            }
+            return new SuccessResult();
+        }
+
+        private IResult CheckIfCarNameExists(string carName)
+        {
+            var result = _carDal.GetAll(p => p.CarName == carName).Any();
+
+            if (result)
+            {
+                return new ErrorResult(Messages.CarNameAlreadyExists);
+            }
+            return new SuccessResult();
+        }
+        private IResult CheckIfBrandLimitExceeded()
+        {
+            var result = _brandService.GetAll();
+            if (result.Data.Count > 15)
+            {
+                return new ErrorResult(Messages.BrandLimitExceeded);
+            }
+            return new SuccessResult();
         }
     }
 }
