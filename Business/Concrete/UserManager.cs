@@ -1,5 +1,6 @@
 ﻿using Business.Abstract;
 using Business.Constants;
+using Core.Entities.Concrete;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework;
@@ -13,45 +14,28 @@ using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
-    public class UserManager : IUserService
-    {
-        IUserDal userDal;
+	public class UserManager : IUserService
+	{
+		IUserDal _userDal;
 
-        public UserManager(IUserDal userDal)
-        {
-            this.userDal = userDal;
-        }
+		public UserManager(IUserDal userDal)
+		{
+			_userDal = userDal;
+		}
 
-        public IResult Add(User user)
-        {
-            if (user.FirstName.Length < 2)
-            {
-                return new ErrorResult(Messages.ColorNameInvalid);
-            }
-            userDal.Add(user);
-            return new SuccessResult(Messages.ColorAdded);
-        }
+		public List<OperationClaim> GetClaims(User user)
+		{
+			return _userDal.GetClaims(user);
+		}
 
-        public IResult Delete(User user)
-        {
-            userDal.Delete(user);
-            return new SuccessResult(Messages.ColorDeleted);
-        }
+		public void Add(User user)
+		{
+			_userDal.Add(user);
+		}
 
-        public IDataResult<List<User>> GetAll()
-        {
-            return new SuccessDataResult<List<User>>(userDal.GetAll(), Messages.ColorsListed);
-
-        }
-
-        public IDataResult<User> GetUserById(int id)
-        {
-            return new SuccessDataResult<User>(userDal.Get(u => u.Id == id));
-        }
-
-        public IResult Update(User user)
-        {
-            throw new NotImplementedException();
-        }
-    }
+		public User GetByMail(string email)
+		{
+			return _userDal.Get(u => u.Email == email);
+		}
+	}
 }

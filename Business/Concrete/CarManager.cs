@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using Business.BusinessAspects.Autofac;
 using Business.Constants;
 using Business.FluentValidation;
 using Core.CrossCuttingConcerns.Validation;
@@ -55,6 +56,7 @@ namespace Business.Concrete
             return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails());
         }
 
+        [SecuredOperation("product.add,admin")]
         public IResult Add(Car car)
         {
             ValidationTool.Validate(new CarValidator(),car);
