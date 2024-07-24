@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Core.Utilities.Security.JWT;
 using Microsoft.EntityFrameworkCore;
+using Core.Utilities.IoC;
+using Core.Extensions;
+using Core.DependencyResolvers;
 
 var builder = WebApplication.CreateBuilder(args);
 var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
@@ -28,9 +31,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 			IssuerSigningKey = SecurityKeyHelper.CreateSecurityKey(tokenOptions.SecurityKey)
 		};
 	});
+builder.Services.AddDependencyResolvers(new ICoreModule[]
+{
+	new CoreModule()
+});
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 

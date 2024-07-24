@@ -17,6 +17,12 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using ValidationException = FluentValidation.ValidationException;
+using Core.Aspects.Autofac.Caching;
+using Core.Aspects.Autofac.Performance;
+using Core.Aspects.Autofac.Transaction;
+using System.Transactions;
+using Core.Aspects.Autofac.Validation;
+using Core.Utilities.Business;
 
 namespace Business.Concrete
 {
@@ -30,10 +36,10 @@ namespace Business.Concrete
             _carDal = carDal;
             _brandService = brandService;
         }
-
-        public IDataResult<List<Car>> GetAll()
+		[CacheAspect]
+		public IDataResult<List<Car>> GetAll()
         {
-            if(DateTime.Now.Hour == 17)
+            if(DateTime.Now.Hour == 14)
             {
                 return new ErrorDataResult<List<Car>>(Messages.MaintenanceTime);
             }  
@@ -56,16 +62,24 @@ namespace Business.Concrete
             return new SuccessDataResult<List<CarDetailDto>>(_carDal.GetCarDetails());
         }
 
-        [SecuredOperation("product.add,admin")]
-        public IResult Add(Car car)
+        [SecuredOperation("car.add,admin")]
+		[ValidationAspect(typeof(CarValidator))]
+		[CacheRemoveAspect("ICarService.Get")]
+		public IResult Add(Car car)
         {
-            ValidationTool.Validate(new CarValidator(),car);
-            _carDal.Add(car);
+			IResult result = BusinessRules.Run(CheckIfCarCountOfBrandCorrect(car.BrandId),
+			CheckIfCarNameExists(car.CarName), CheckIfBrandLimitExceeded());
+			if (result != null)
+			{
+				return result;
+			}
+			_carDal.Add(car);
             return new SuccessResult(Messages.CarAdded);
 
         }
-
-        public IResult Update(Car car)
+		[ValidationAspect(typeof(CarValidator))]
+		[CacheRemoveAspect("ICarService.Get")]
+		public IResult Update(Car car)
         {
             _carDal.Update(car);
             return new SuccessDataResult<List<Car>>(Messages.CarUpdated);
@@ -77,7 +91,9 @@ namespace Business.Concrete
             return new SuccessDataResult<List<Car>>(Messages.CarDeleted);
         }
 
-        public IDataResult<Car> GetById(int id)
+		[CacheAspect]
+		[PerformanceAspect(5)]
+		public IDataResult<Car> GetById(int id)
         {
             return new SuccessDataResult<Car>(_carDal.Get(b => b.CarId == id));
         }
@@ -112,5 +128,13 @@ namespace Business.Concrete
             }
             return new SuccessResult();
         }
-    }
+
+		[TransactionScopeAspect]
+		public IResult TransactionalOperation(Car car)
+		{
+			_carDal.Update(car);
+			_carDal.Add(car);
+			return new SuccessResult(Messages.CarUpdated);
+		}
+	}
 }
