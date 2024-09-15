@@ -15,56 +15,70 @@ using Core.Extensions;
 using Core.DependencyResolvers;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuration for JWT Authentication
 var tokenOptions = builder.Configuration.GetSection("TokenOptions").Get<TokenOptions>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-	.AddJwtBearer(options =>
-	{
-		options.TokenValidationParameters = new TokenValidationParameters
-		{
-			ValidateIssuer = true,
-			ValidateAudience = true,
-			ValidateLifetime = true,
-			ValidIssuer = tokenOptions.Issuer,
-			ValidAudience = tokenOptions.Audience,
-			ValidateIssuerSigningKey = true,
-			IssuerSigningKey = SecurityKeyHelper.CreateSecurityKey(tokenOptions.SecurityKey)
-		};
-	});
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidIssuer = tokenOptions.Issuer,
+            ValidAudience = tokenOptions.Audience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = SecurityKeyHelper.CreateSecurityKey(tokenOptions.SecurityKey)
+        };
+    });
+
+// Add Autofac and other services to the container
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(options =>
+    options.RegisterModule(new AutofacBusinessModule()))
+);
+
 builder.Services.AddDependencyResolvers(new ICoreModule[]
 {
-	new CoreModule()
+    new CoreModule()
 });
-// Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddCors();
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("http://localhost:4200")
+                          .AllowAnyHeader()
+                          .AllowAnyMethod());
+});
+
+// Add DbContext with SQL Server
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory(options =>
-    options.RegisterModule(new AutofacBusinessModule())
-));
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Swagger and API Explorer
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors(builder => builder.WithOrigins("http://localhost:4200").AllowAnyHeader());
+
+// Serve static files from wwwroot
+app.UseStaticFiles(); // Add this line to serve static files
 
 app.UseHttpsRedirection();
 
-app.UseAuthorization();
+app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

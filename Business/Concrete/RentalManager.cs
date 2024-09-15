@@ -2,29 +2,28 @@
 using Business.Constants;
 using Core.Utilities.Results;
 using DataAccess.Abstract;
-using DataAccess.Concrete.EntityFramework;
 using Entities.Concrete;
 using Entities.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Business.Concrete
 {
     public class RentalManager : IRentalService
     {
         IRentalDal _rentalDal;
-        public RentalManager(IRentalDal rental)
+
+        public RentalManager(IRentalDal rentalDal)
         {
-            _rentalDal = rental;
+            _rentalDal = rentalDal;
         }
 
         public IResult Add(Rental rental)
         {
+            // Araç müsait mi kontrolü
             bool carCheck = IsAvailable(rental.CarId);
-            if(carCheck)
+            if (carCheck)
             {
                 _rentalDal.Add(rental);
                 return new SuccessResult(Messages.RentalAdded);
@@ -45,23 +44,7 @@ namespace Business.Concrete
 
         public IDataResult<Rental> GetById(int id)
         {
-            throw new NotImplementedException();
-        }
-
-        public bool IsAvailable(int carId)
-        {
-            var rentals = _rentalDal.GetAll();
-            bool isRented = rentals.Any(Car => Car.Id == carId);
-            if (isRented)
-            {
-                bool isReturnEmpty = rentals.Any(Car => Car.Id == carId && Car.ReturnDate == null);
-                if (isReturnEmpty)
-                {
-                    return false;
-                }
-            }
-            return true;
-
+            return new SuccessDataResult<Rental>(_rentalDal.Get(r => r.Id == id), Messages.RentalListed);
         }
 
         public IResult Update(Rental rental)
@@ -72,8 +55,26 @@ namespace Business.Concrete
 
         public IDataResult<List<RentalDetailDto>> GetRentalDetails()
         {
-
             return new SuccessDataResult<List<RentalDetailDto>>(_rentalDal.GetRentalDetails());
+        }
+
+        // Belirli bir tarih aralığında araç müsait mi kontrolü
+        public IResult CheckCarAvailability(int carId, DateTime startDate, DateTime endDate)
+        {
+            var rentals = _rentalDal.GetAll(r => r.CarId == carId &&
+                                               (r.RentDate < endDate && r.ReturnDate > startDate));
+            if (rentals.Any())
+            {
+                return new ErrorResult("Araç bu tarihlerde kiralanamaz.");
+            }
+            return new SuccessResult("Araç uygun.");
+        }
+
+        // Mevcut: Araç şu anda kirada mı kontrolü
+        public bool IsAvailable(int carId)
+        {
+            var rentals = _rentalDal.GetAll(r => r.CarId == carId && r.ReturnDate == null);
+            return !rentals.Any(); // ReturnDate null olan bir kiralama varsa araç müsait değil
         }
     }
 }

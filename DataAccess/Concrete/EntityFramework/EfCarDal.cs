@@ -3,6 +3,8 @@ using DataAccess.Abstract;
 using DataAccess.Concrete.EntityFramework;
 using Entities.Concrete;
 using Entities.DTOs;
+using System.Collections.Generic;
+using System.Linq;
 
 public class EfCarDal : EfEntityRepositoryBase<Car, MyDbContext>, ICarDal
 {
@@ -17,10 +19,16 @@ public class EfCarDal : EfEntityRepositoryBase<Car, MyDbContext>, ICarDal
                          select new CarDetailDto
                          {
                              CarId = c.CarId,
+                             BrandId = c.BrandId, // BrandId eklendi
+                             ColorId = c.ColorId, // ColorId eklendi
                              BrandName = b.BrandName,
                              ColorName = co.ColorName,
                              DailyPrice = c.DailyPrice,
-                             CarName = c.CarName
+                             CarName = c.CarName,
+                             Images = context.CarImages
+                                         .Where(ci => ci.CarId == c.CarId)
+                                         .Select(ci => ci.ImagePath)
+                                         .ToList()
                          };
             return result.ToList();
         }
@@ -38,14 +46,22 @@ public class EfCarDal : EfEntityRepositoryBase<Car, MyDbContext>, ICarDal
                          select new CarDetailDto
                          {
                              CarId = c.CarId,
+                             BrandId = c.BrandId, // BrandId eklendi
+                             ColorId = c.ColorId, // ColorId eklendi
                              BrandName = b.BrandName,
                              ColorName = co.ColorName,
                              DailyPrice = c.DailyPrice,
-                             CarName = c.CarName
+                             CarName = c.CarName,
+                             Images = context.CarImages
+                                         .Where(ci => ci.CarId == c.CarId)
+                                         .Select(ci => ci.ImagePath)
+                                         .ToList()
                          };
             return result.ToList();
         }
     }
+
+    // CarId ile filtreleme yapacak metot
     public CarDetailDto GetCarDetailById(int id)
     {
         using (MyDbContext context = new MyDbContext())
@@ -56,11 +72,17 @@ public class EfCarDal : EfEntityRepositoryBase<Car, MyDbContext>, ICarDal
                          where c.CarId == id
                          select new CarDetailDto
                          {
+                             CarId = c.CarId,
+                             BrandId = c.BrandId, // BrandId eklendi
+                             ColorId = c.ColorId, // ColorId eklendi
                              CarName = c.CarName,
                              BrandName = b.BrandName,
                              DailyPrice = c.DailyPrice,
                              ColorName = co.ColorName,
-                             CarId = c.CarId
+                             Images = context.CarImages
+                                         .Where(ci => ci.CarId == c.CarId)
+                                         .Select(ci => ci.ImagePath)
+                                         .ToList()
                          };
             return result.SingleOrDefault();
         }

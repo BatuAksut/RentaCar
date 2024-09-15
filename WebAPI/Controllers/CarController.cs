@@ -92,6 +92,15 @@ namespace WebAPI.Controllers
             return BadRequest(result);
         }
 
-
+        [HttpGet("getcardetailbyidwithimages")]
+        public IActionResult GetCarDetailByIdWithImages(int id)
+        {
+            var result = _carService.GetCarDetailByIdWithImages(id);
+            if (result != null)
+            {
+                return Ok(new { success = true, data = result });
+            }
+            return NotFound(new { success = false, message = "Car not found" });
+        }
     }
 }

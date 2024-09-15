@@ -23,6 +23,7 @@ using Core.Aspects.Autofac.Transaction;
 using System.Transactions;
 using Core.Aspects.Autofac.Validation;
 using Core.Utilities.Business;
+using Microsoft.Extensions.Configuration;
 
 namespace Business.Concrete
 {
@@ -30,11 +31,15 @@ namespace Business.Concrete
     {
         ICarDal _carDal;
         IBrandService _brandService;
+        ICarImageDal _carImageDal;
+        string _baseUrl;
 
-        public CarManager(ICarDal carDal,IBrandService brandService)
+        public CarManager(ICarDal carDal,IBrandService brandService,ICarImageDal carImageDal, IConfiguration configuration)
         {
             _carDal = carDal;
             _brandService = brandService;
+            _carImageDal = carImageDal;
+            _baseUrl = configuration["BaseUrl"];
         }
 		[CacheAspect]
 		public IDataResult<List<Car>> GetAll()
@@ -147,6 +152,26 @@ namespace Business.Concrete
 			return new SuccessResult(Messages.CarUpdated);
 		}
 
-     
+        public CarDetailDto GetCarDetailByIdWithImages(int id)
+        {
+            var car = _carDal.GetCarDetailById(id);
+            if (car == null)
+                return null;
+
+            var carImages = _carImageDal.GetImagesByCarId(id);
+
+            var imageUrls = carImages.Select(img => $"{_baseUrl}uploads/{Path.GetFileName(img.ImagePath)}").ToList();
+
+            return new CarDetailDto
+            {
+                CarId = car.CarId,
+                CarName = car.CarName,
+                BrandName = car.BrandName,
+                DailyPrice = car.DailyPrice,
+                ColorName = car.ColorName,
+                Images = imageUrls
+            };
+        }
+
     }
 }
