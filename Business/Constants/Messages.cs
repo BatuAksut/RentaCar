@@ -53,5 +53,7 @@ namespace Business.Constants
 
         public static string CarUnavailable = "Araç uygun değil.";
         public static string CarAvailable = "Araç uygun";
+
+        public static string ColorNotFound { get; internal set; }
     }
 }

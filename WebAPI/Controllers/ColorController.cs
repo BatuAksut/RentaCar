@@ -49,5 +49,34 @@ namespace WebAPI.Controllers
             }
             return BadRequest(result);
         }
+
+        [HttpPost("update")]
+        public IActionResult Update([FromBody] Color color)
+        {
+            if (color == null)
+            {
+                return BadRequest("Color object is null");
+            }
+
+            var result = _colorService.Update(color);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result.Message); // Hata mesajını döndür
+        }
+
+        [HttpDelete("delete")]
+        public IActionResult Delete(Color color)
+        {
+            var result = _colorService.Delete(color);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
     }
 }

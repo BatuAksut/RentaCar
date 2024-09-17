@@ -102,5 +102,28 @@ namespace WebAPI.Controllers
             }
             return NotFound(new { success = false, message = "Car not found" });
         }
+
+        [HttpPut("update")]
+        public IActionResult Update([FromBody] Car car)
+        {
+            var result = _carService.Update(car); // Servis katmanında güncelleme işlemi
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
+        [HttpDelete("delete")]
+        public IActionResult Delete(Car car)
+        {
+            var result = _carService.Delete(car); // Servis katmanında silme işlemi
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+
     }
 }

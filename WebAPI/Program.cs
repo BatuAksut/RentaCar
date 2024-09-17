@@ -45,6 +45,7 @@ builder.Services.AddDependencyResolvers(new ICoreModule[]
 });
 
 builder.Services.AddControllers();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
@@ -74,7 +75,7 @@ if (app.Environment.IsDevelopment())
 app.UseStaticFiles(); // Add this line to serve static files
 
 app.UseHttpsRedirection();
-
+app.ConfigureCustomExceptionMiddleware();
 app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthentication();

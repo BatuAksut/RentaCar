@@ -50,10 +50,18 @@ namespace Business.Concrete
 
         public IResult Update(Color color)
         {
-            _colorDal.Update(color);
+            var existingColor = _colorDal.Get(c => c.ColorId == color.ColorId);
+            if (existingColor == null)
+            {
+                return new ErrorResult(Messages.ColorNotFound);
+            }
+
+            existingColor.ColorName = color.ColorName;
+            _colorDal.Update(existingColor);
+
             return new SuccessResult(Messages.ColorUpdated);
         }
 
-       
+
     }
 }
