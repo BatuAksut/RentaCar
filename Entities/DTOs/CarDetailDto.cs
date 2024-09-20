@@ -13,6 +13,7 @@ namespace Entities.DTOs
         public string BrandName { get; set; }
         public int DailyPrice { get; set; }
         public string ColorName { get; set; }
-        public List<string> Images { get; set; } // Resim URL'lerini tutacak liste
+        public List<string> Images { get; set; }
+        public int MinFindeksScore { get; set; }
     }
 }

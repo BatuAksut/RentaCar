@@ -1,16 +1,16 @@
 ﻿using Core.Entities.Concrete;
-using System;
+using Entities.DTOs;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Business.Abstract
 {
-	public interface IUserService
-	{
-		List<OperationClaim> GetClaims(User user);
-		void Add(User user);
-		User GetByMail(string email);
-	}
+    public interface IUserService
+    {
+        List<OperationClaim> GetClaims(User user);
+        void Add(User user);
+        User GetByMail(string email);
+        List<User> GetAll(); // Yeni metod
+        User GetUserById(int userId);
+        void UpdateUser(UserForUpdateDto userForUpdateDto, int userId);
+    }
 }

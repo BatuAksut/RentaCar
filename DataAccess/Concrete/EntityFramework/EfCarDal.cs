@@ -19,12 +19,13 @@ public class EfCarDal : EfEntityRepositoryBase<Car, MyDbContext>, ICarDal
                          select new CarDetailDto
                          {
                              CarId = c.CarId,
-                             BrandId = c.BrandId, // BrandId eklendi
-                             ColorId = c.ColorId, // ColorId eklendi
+                             BrandId = c.BrandId,
+                             ColorId = c.ColorId,
                              BrandName = b.BrandName,
                              ColorName = co.ColorName,
                              DailyPrice = c.DailyPrice,
                              CarName = c.CarName,
+                             MinFindeksScore = c.MinFindeksScore, // Minimum Findeks Puanı eklendi
                              Images = context.CarImages
                                          .Where(ci => ci.CarId == c.CarId)
                                          .Select(ci => ci.ImagePath)
@@ -52,6 +53,7 @@ public class EfCarDal : EfEntityRepositoryBase<Car, MyDbContext>, ICarDal
                              ColorName = co.ColorName,
                              DailyPrice = c.DailyPrice,
                              CarName = c.CarName,
+                             MinFindeksScore = c.MinFindeksScore,
                              Images = context.CarImages
                                          .Where(ci => ci.CarId == c.CarId)
                                          .Select(ci => ci.ImagePath)
@@ -73,12 +75,13 @@ public class EfCarDal : EfEntityRepositoryBase<Car, MyDbContext>, ICarDal
                          select new CarDetailDto
                          {
                              CarId = c.CarId,
-                             BrandId = c.BrandId, // BrandId eklendi
-                             ColorId = c.ColorId, // ColorId eklendi
+                             BrandId = c.BrandId,
+                             ColorId = c.ColorId,
                              CarName = c.CarName,
                              BrandName = b.BrandName,
                              DailyPrice = c.DailyPrice,
                              ColorName = co.ColorName,
+                             MinFindeksScore = c.MinFindeksScore, // Minimum Findeks Puanı eklendi
                              Images = context.CarImages
                                          .Where(ci => ci.CarId == c.CarId)
                                          .Select(ci => ci.ImagePath)
